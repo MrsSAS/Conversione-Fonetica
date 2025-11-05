@@ -63,7 +63,7 @@ python --version
 
 ```
 
-## 💻 Utilizzo
+## Utilizzo
 
 
 ```bash
@@ -103,7 +103,7 @@ Arrivederci!
 *N.B.*
 Questo è solo uno strumento per agevolare la generazione di parole a partire da un numero, ma non è assolutamente garantita la qualità delle parole generate! L'obiettivo è esclusivamente quello di trovare un riscontro tra i numeri inseriti e l'elenco dei termini presenti nel dizionario usato, ma a ciascuno spetta il compito di scegliere la parola più conveniente da memorizzare, a seconda delle proprie esigenze.
 
-## Esempi Pratici 📚
+## Esempi Pratici
 
 ### Memorizzare una data: 1492 (Scoperta dell'America)
 
@@ -156,22 +156,22 @@ Parole trovate: x
 
 I contributi sono benvenuti! Ecco come puoi aiutare:
 
-1. 🐛 Segnala comportamenti inattesi, bug o casi limite
-2. 💡 Proponi nuove funzionalità
-3. 📝 Migliora la documentazione
+1. Segnala comportamenti inattesi, bug o casi limite
+2. Proponi nuove funzionalità
+3. Migliora la documentazione
 
-## 📄 Licenza
+## Licenza
 
 Questo progetto è distribuito sotto licenza MIT. Vedi il file `LICENSE` per maggiori dettagli.
 
-## 🙏 Riconoscimenti
+## Riconoscimenti
 
 - Ispirato dal [Major System](https://it.wikipedia.org/wiki/Conversione_fonetica) classico
 - Adattato per le peculiarità fonetiche della lingua italiana
 - Grazie a [Matteo Salvo](https://www.youtube.com/watch?v=E56DGcTSBu0) per avermi fatto scoprire questa fantastica tecnica mnemonica.
 - Dizionario italiano da più di 95.000 parole da: [paroleitaliane](https://github.com/napolux/paroleitaliane/blob/main/paroleitaliane/95000_parole_italiane_con_nomi_propri.txt) di [@napolux](https://github.com/napolux).
 
-## 📞 Contatti
+## Contatti
 
 Per domande, suggerimenti o segnalazioni:
 - Apri una [issue](https://github.com/MrsSAS/Conversione-Fonetica/issues)
