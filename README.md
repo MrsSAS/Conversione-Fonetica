@@ -10,7 +10,7 @@ Il **Major System** (o sistema di conversione fonetica) è una tecnica mnemonica
 - Date storiche
 - Codici PIN
 - Costanti matematiche (π, e, φ)
-- Numeri di carte di creditos
+- Numeri di carte di credito
 - E tutto ciò che può essere convertito in cifre!
 
 Questa tecnica raggiunge il suo massimo potenziale se abbinata alla creazione di storie buffe, paradossali e assurde così da agevolare la memorizzazione.
