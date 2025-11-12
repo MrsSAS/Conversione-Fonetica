@@ -24,7 +24,7 @@ Ogni cifra decimale da 0 a 9 corrisponde a uno o più suoni consonantici specifi
 | **0** | s, z, sc(i/e) | **s**ole, **z**ero, **sc**ienza |
 | **1** | t, d | **t**oro, **d**ato |
 | **2** | n, gn | **n**aso, **gn**omo |
-| **3** | m | **m**ano, a**mm**ore |
+| **3** | m | **m**ano, a**m**ore |
 | **4** | r | **r**osa, ca**rr**o |
 | **5** | l, gli+vocale | **l**una, fi**gli**o, me**gli**o |
 | **6** | c/g dolce | **ci**ao, **ge**lo, **ce**na, pa**gi**na |
