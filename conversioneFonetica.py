@@ -12,7 +12,7 @@ class MajorSystemIT:
     3 = m
     4 = r
     5 = l, gli+vocale o fine parola
-    6 = c/g dolce (ci, gi, ce, ge)
+    6 = c/g/j dolce (ci, gi, ce, ge...)
     7 = c/g dura (k, ch, gh, ca, ga, cu, co, gu, go, q)
     8 = f, v
     9 = p, b
@@ -150,6 +150,10 @@ class MajorSystemIT:
                     if ultimo_numero != '7':
                         numero += '7'
                         ultimo_numero = '7'
+            elif char == 'j':
+                if ultimo_numero != '6':
+                    numero += '6'
+                    ultimo_numero = '6'
             elif char in ['k', 'q']:
                 if ultimo_numero != '7':
                     numero += '7'
