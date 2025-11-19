@@ -1,0 +1,7 @@
+# Cache del dizionario
+*.cache
+
+# File comuni da ignorare
+__pycache__/
+*.py[cod]
+*$py.class
