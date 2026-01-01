@@ -70,7 +70,7 @@ python --version
 python conversioneFonetica.py
 ```
 
-Lo script caricherà in automatico il dizionario e avvierà una sessione interattiva:
+Lo script caricherà in automatico il dizionario (possibilmente dalla cache) e avvierà una sessione interattiva:
 
 ```
 ==============================================================
@@ -151,6 +151,34 @@ Parole trovate: x
   ...
 
 ```
+
+### Feature aggiuntive
+
+Può capitare che, a partire da un certo numero, non esistano parole corrispondenti oppure che quelle disponibili risultino poco memorabili. Per questo motivo, durante la generazione è possibile far seguire il numero dal simbolo `+`.
+Quando si utilizza il `+`, la ricerca non si limita più alle parole che corrispondono esattamente alla sequenza di cifre indicata, ma viene estesa a tutte le parole che condividono lo stesso prefisso fonetico. In altre parole, vengono **incluse anche parole più lunghe** che iniziano con la codifica fonetica del numero dato.
+
+In questo caso, oltre all’elenco delle parole trovate, il software mostra anche il numero di cifre coperte da ciascuna parola, così da rendere più immediata la valutazione dei risultati. Ecco un esempio concreto del funzionamento:
+
+```bash
+> 378
+Parole trovate: 0
+
+> 378+
+Parole trovate: x
+  1. ...
+  2. machiavelli          (3785)
+  3. ...
+  4. megafono             (3782)
+ ...
+```
+
+*N.B.*
+
+L’uso del simbolo `+` va usato con cautela, in quanto presuppone che l’utente adotti una **convenzione preventiva** sul numero di cifre da considerare nel richiamo mnemonico. Chi utilizza il `+` deve infatti sapere *a priori* fino a quante cifre estendere il proprio conteggio.
+
+Ad esempio, se nel proprio palazzo della memoria i numeri vengono sempre organizzati in gruppi da **3 cifre**, la differenza tra `378` e `378+`, come sopra, diventa significativa: mentre a `378` non corrispondere parole valide, `378+` resituisce termini come *megafono* (3782), facilmente richiamabile, che però codifica **più cifre del gruppo previsto**. In questo caso, spetta all’utente applicare la propria convenzione preferita e limitare il recall alle prime cifre desiderate, ignorando quelle eccedenti.
+
+Il simbolo `+` amplia quindi la ricerca, ma non modifica la struttura mnemonica adottata: la gestione del numero effettivo di cifre da ricordare resta una responsabilità dell’utente.
 
 ## Contribuire
 

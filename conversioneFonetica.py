@@ -214,24 +214,48 @@ class MajorSystemIT:
         except Exception as e:
             print(f"Errore durante il caricamento: {e}")
     
-    def cerca_parole(self, numero):
-        """Trova tutte le parole che corrispondono a un numero."""
+    def cerca_parole(self, numero, prefix_mode=False):
+        """
+        Trova tutte le parole che corrispondono a un numero.
+        
+        Args:
+            numero: Il numero da cercare (stringa o int)
+            prefix_mode: Se True, cerca tutte le parole che iniziano con questo numero
+                        (es. "94" troverà anche "940", "941", "942", ecc.)
+        """
         numero_str = str(numero)
-        parole = self.parole_per_numero.get(numero_str, [])
+        
+        if not prefix_mode:
+            # Modalità normale: match esatto
+            parole = self.parole_per_numero.get(numero_str, [])
+        else:
+            # Modalità prefix: tutte le chiavi che iniziano con numero_str
+            parole = []
+            for chiave, lista_parole in self.parole_per_numero.items():
+                if chiave.startswith(numero_str):
+                    parole.extend(lista_parole)
+        
         return sorted(parole)
     
-    def mostra_risultati(self, numero, max_risultati=100):
+    def mostra_risultati(self, numero, max_risultati=100, prefix_mode=False):
         """Mostra i risultati della ricerca."""
-        parole = self.cerca_parole(numero)
+        parole = self.cerca_parole(numero, prefix_mode=prefix_mode)
+        
+        modo = "che iniziano con" if prefix_mode else "esatte per"
         
         print(f"\n{'='*60}")
-        print(f"Numero: {numero}")
-        print(f"Parole trovate: {len(parole)}")
+        print(f"Numero: {numero}{'+' if prefix_mode else ''}")
+        print(f"Parole {modo}: {len(parole)}")
         print(f"{'='*60}")
         
         if parole:
             for i, parola in enumerate(parole[:max_risultati], 1):
-                print(f"{i:3d}. {parola}")
+                # Mostra anche il numero completo in modalità prefix
+                if prefix_mode:
+                    num = self.parola_a_numero(parola)
+                    print(f"{i:3d}. {parola:20s} ({num})")
+                else:
+                    print(f"{i:3d}. {parola}")
             
             if len(parole) > max_risultati:
                 print(f"\n... e altre {len(parole) - max_risultati} parole.")
@@ -245,7 +269,8 @@ class MajorSystemIT:
         print("="*60)
         print("\nComandi disponibili:")
         print("  - Inserisci un numero per trovare le parole corrispondenti")
-        print("  - 'test <parola>' per vedere il numero di una parola, anche inventata")
+        print("  - Inserisci un numero seguito da '+' per trovare tutte le parole che iniziano con quel numero")
+        print("  - 'test <parola>' per vedere il numero di una parola")
         print("  - 'q' o 'quit' per uscire")
         print()
         
@@ -266,10 +291,16 @@ class MajorSystemIT:
                         print(f"'{parola}' non produce alcun numero (solo vocali?)")
                     continue
                 
+                # Controlla se c'è il simbolo +
+                prefix_mode = False
+                if comando.endswith('+') or comando.endswith(' +'):
+                    prefix_mode = True
+                    comando = comando.rstrip(' +')
+                
                 if comando.isdigit():
-                    self.mostra_risultati(comando)
+                    self.mostra_risultati(comando, prefix_mode=prefix_mode)
                 else:
-                    print("Inserisci un numero valido o 'test <parola>' per testare una parola.")
+                    print("Inserisci un numero valido (opzionalmente seguito da '+') o 'test <parola>'.")
                     
             except KeyboardInterrupt:
                 print("\n\nInterrotto. Arrivederci!")
