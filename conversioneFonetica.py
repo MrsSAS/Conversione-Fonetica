@@ -237,7 +237,7 @@ class MajorSystemIT:
         
         return sorted(parole)
     
-    def mostra_risultati(self, numero, max_risultati=100, prefix_mode=False):
+    def mostra_risultati(self, numero, max_risultati=1000, prefix_mode=False):
         """Mostra i risultati della ricerca."""
         parole = self.cerca_parole(numero, prefix_mode=prefix_mode)
         
@@ -270,25 +270,25 @@ class MajorSystemIT:
         print("\nComandi disponibili:")
         print("  - Inserisci un numero per trovare le parole corrispondenti")
         print("  - Inserisci un numero seguito da '+' per trovare tutte le parole che iniziano con quel numero")
-        print("  - 'test <parola>' per vedere il numero di una parola")
-        print("  - 'q' o 'quit' per uscire")
+        print("  - Inserisci una parola per vedere il numero corrispondente")
+        print("  - Premi 'ctrl + c' oppure '!' per uscire")
         print()
         
         while True:
             try:
+                
                 comando = input("\n> ").strip()
-                
-                if comando.lower() in ['q', 'quit', 'esci']:
-                    print("Arrivederci!")
+                if comando == "!":
+                    print("\nInterrotto. Arrivederci!")
                     break
-                
-                if comando.lower().startswith('test '):
-                    parola = comando[5:].strip()
+
+                if comando.isalpha():
+                    parola = comando.strip()
                     numero = self.parola_a_numero(parola)
                     if numero:
                         print(f"'{parola}' -> {numero}")
                     else:
-                        print(f"'{parola}' non produce alcun numero (solo vocali?)")
+                        print(f"'{parola}', come da regole, non produce alcun numero.")
                     continue
                 
                 # Controlla se c'è il simbolo +
@@ -300,13 +300,13 @@ class MajorSystemIT:
                 if comando.isdigit():
                     self.mostra_risultati(comando, prefix_mode=prefix_mode)
                 else:
-                    print("Inserisci un numero valido (opzionalmente seguito da '+') o 'test <parola>'.")
+                    print("Inserisci un numero valido (opzionalmente seguito da '+') o una parola.")
                     
             except KeyboardInterrupt:
-                print("\n\nInterrotto. Arrivederci!")
+                print("\nInterrotto. Arrivederci!")
                 break
             except Exception as e:
-                print(f"Errore: {e}")
+                print(f"Errore, segnale non valido: {e}")
 
 
 # Esempio di utilizzo

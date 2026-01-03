@@ -79,8 +79,9 @@ MAJOR SYSTEM ITALIANO - Conversione Fonetica
 
 Comandi disponibili:
   - Inserisci un numero per trovare le parole corrispondenti
-  - 'test <parola>' per vedere il numero di una parola
-  - 'q' o 'quit' per uscire
+  - Inserisci un numero seguito da '+' per trovare tutte le parole che iniziano con quel numero
+  - Inserisci una parola per vedere il numero corrispondente
+  - Premi 'ctrl + c' oppure '!' per uscire
 
 > 26
 ============================================================
@@ -93,11 +94,12 @@ Parole trovate: x
   4. noce
   ...
 
-> test mamma
-'naso' -> 20
+> cuscino
+'cuscino' -> 702
 
-> q
+> !
 Arrivederci!
+
 ```
 
 *N.B.*
