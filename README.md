@@ -79,7 +79,9 @@ MAJOR SYSTEM ITALIANO - Conversione Fonetica
 
 Comandi disponibili:
   - Inserisci un numero per trovare le parole corrispondenti
-  - Inserisci un numero seguito da '+' per trovare tutte le parole che iniziano con quel numero
+  - Inserisci un numero seguito da '+' per trovare le parole che iniziano con quel numero
+  - Inserisci '+' seguito da un numero per trovare le parole che terminano con quel numero
+  - Inserisci '+' all'inizio e alla fine di un numero per trovare le parole che contengono quel numero
   - Inserisci una parola per vedere il numero corrispondente
   - Premi 'ctrl + c' oppure '!' per uscire
 
@@ -156,10 +158,16 @@ Parole trovate: x
 
 ### Feature aggiuntive
 
-Può capitare che, a partire da un certo numero, non esistano parole corrispondenti oppure che quelle disponibili risultino poco memorabili. Per questo motivo, durante la generazione è possibile far seguire il numero dal simbolo `+`.
-Quando si utilizza il `+`, la ricerca non si limita più alle parole che corrispondono esattamente alla sequenza di cifre indicata, ma viene estesa a tutte le parole che condividono lo stesso prefisso fonetico. In altre parole, vengono **incluse anche parole più lunghe** che iniziano con la codifica fonetica del numero dato.
+Oltre alla ricerca esatta, è possibile usare il simbolo `+` per espandere la ricerca:
 
-In questo caso, oltre all’elenco delle parole trovate, il software mostra anche il numero di cifre coperte da ciascuna parola, così da rendere più immediata la valutazione dei risultati. Ecco un esempio concreto del funzionamento:
+| Comando | Significato |
+|---------|-------------|
+| `23` | corrispondenza esatta |
+| `23+` | tutte le parole che iniziano con 23 |
+| `+23` | tutte le parole che terminano con 23 |
+| `+23+` | tutte le parole che contengono 23 |
+
+Nelle modalità non esatte, oltre all'elenco delle parole trovate, il software mostra anche il numero fonetico completo di ciascuna parola, così da rendere più immediata la valutazione dei risultati. Ecco un esempio:
 
 ```bash
 > 378
@@ -176,7 +184,7 @@ Parole trovate: x
 
 *N.B.*
 
-L’uso del simbolo `+` va usato con cautela, in quanto presuppone che l’utente adotti una **convenzione preventiva** sul numero di cifre da considerare nel richiamo mnemonico. Chi utilizza il `+` deve infatti sapere *a priori* fino a quante cifre estendere il proprio conteggio.
+L’uso del simbolo `+` va usato con cautela, in quanto presuppone che l’utente adotti una **convenzione preventiva** sul numero di cifre da considerare nel richiamo mnemonico. Chi utilizza il `+` deve infatti sapere *a priori* quale nuova convenzione seguire.
 
 Ad esempio, se nel proprio palazzo della memoria i numeri vengono sempre organizzati in gruppi da **3 cifre**, la differenza tra `378` e `378+`, come sopra, diventa significativa: mentre a `378` non corrispondere parole valide, `378+` resituisce termini come *megafono* (3782), facilmente richiamabile, che però codifica **più cifre del gruppo previsto**. In questo caso, spetta all’utente applicare la propria convenzione preferita e limitare il recall alle prime cifre desiderate, ignorando quelle eccedenti.
 
