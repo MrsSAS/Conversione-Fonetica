@@ -1,11 +1,12 @@
 import pickle
 import os
+import readline
 from collections import defaultdict
 
 class MajorSystemIT:
     """
     Sistema mnemonico della conversione fonetica per l'italiano.
-    
+
     Mappatura numero -> suono:
     0 = s, z, sc(e/i)
     1 = t, d
@@ -18,7 +19,7 @@ class MajorSystemIT:
     8 = f, v
     9 = p, b
     """
-    
+
     def __init__(self, dizionario_path='dizionario.txt'):
         self.dizionario_path = dizionario_path
         self.cache_path = dizionario_path + '.cache'
@@ -28,20 +29,20 @@ class MajorSystemIT:
         """Verifica se il dizionario è stato modificato dopo la cache."""
         if not os.path.exists(self.cache_path):
             return True
-        
+
         dict_mtime = os.path.getmtime(self.dizionario_path)
         cache_mtime = os.path.getmtime(self.cache_path)
-        
+
         return dict_mtime > cache_mtime
 
-        
+
     def parola_a_numero(self, parola):
         """Converte una parola italiana in numero secondo il Major System."""
         parola = parola.lower()
         numero = ''
         i = 0
         ultimo_numero = None  # Per gestire le doppie
-        
+
         while i < len(parola):
             # Gestione sequenze di 3+ caratteri per "gli"
             if i + 2 < len(parola):
@@ -62,7 +63,7 @@ class MajorSystemIT:
                         i += 3
                         continue
                     # Altrimenti "gl" + consonante = due suoni separati (continua normalmente)
-                
+
                 # sci/sce = 0
                 tri = parola[i:i+3]
                 if tri in ['sci', 'sce']:
@@ -71,7 +72,7 @@ class MajorSystemIT:
                         ultimo_numero = '0'
                     i += 3
                     continue
-            
+
             # Controlla "gli" a fine parola (2 caratteri rimanenti)
             if i + 2 == len(parola) and parola[i:i+3] == 'gli':
                 if ultimo_numero != '5':
@@ -79,11 +80,11 @@ class MajorSystemIT:
                     ultimo_numero = '5'
                 i += 3
                 continue
-            
+
             # Gestione sequenze di 2 caratteri
             if i + 1 < len(parola):
                 bi = parola[i:i+2]
-                
+
                 # gn = 2
                 if bi == 'gn':
                     if ultimo_numero != '2':
@@ -91,7 +92,7 @@ class MajorSystemIT:
                         ultimo_numero = '2'
                     i += 2
                     continue
-                
+
                 # ch = 7 (suono duro)
                 if bi in ['ch', 'gh']:
                     if ultimo_numero != '7':
@@ -99,7 +100,7 @@ class MajorSystemIT:
                         ultimo_numero = '7'
                     i += 2
                     continue
-                
+
                 # ci/ce/gi/ge = 6 (suono dolce)
                 if bi in ['ci', 'ce', 'gi', 'ge']:
                     if ultimo_numero != '6':
@@ -107,10 +108,10 @@ class MajorSystemIT:
                         ultimo_numero = '6'
                     i += 2
                     continue
-            
+
             # Gestione caratteri singoli
             char = parola[i]
-            
+
             if char in ['s', 'z']:
                 if ultimo_numero != '0':
                     numero += '0'
@@ -174,14 +175,14 @@ class MajorSystemIT:
             else:
                 # Vocali e altre lettere azzerano l'ultimo numero
                 ultimo_numero = None
-            
+
             i += 1
-        
+
         return numero if numero else None
-    
+
     def carica_dizionario(self):
         """Carica il dizionario (dalla cache o lo rigenera) e crea l'indice numero -> parole."""
-        
+
         # Prova a caricare dalla cache
         if os.path.exists(self.cache_path) and not self._dizionario_modificato():
             try:
@@ -193,7 +194,7 @@ class MajorSystemIT:
                 print(f"Errore nel caricamento cache: {e}. Ricostruisco...")
 
         print("Caricamento dizionario in corso...")
-        
+
         try:
             with open(self.dizionario_path, 'r', encoding='utf-8') as f:
                 for linea in f:
@@ -202,66 +203,88 @@ class MajorSystemIT:
                     numero = self.parola_a_numero(parola)
                     if not numero: continue
                     self.parole_per_numero[numero].append(parola)
-            
+
             # Salva la cache
             with open(self.cache_path, 'wb') as f:
                 pickle.dump(dict(self.parole_per_numero), f)
             print(f"Dizionario caricato e cache salvata! {len(self.parole_per_numero)} sequenze.")
-        
+
         except FileNotFoundError:
             print(f"Errore: file '{self.dizionario_path}' non trovato.")
-        
+
         except Exception as e:
             print(f"Errore durante il caricamento: {e}")
-    
-    def cerca_parole(self, numero, prefix_mode=False):
+
+    def cerca_parole(self, numero, mode="esatta"):
         """
         Trova tutte le parole che corrispondono a un numero.
-        
-        Args:
-            numero: Il numero da cercare (stringa o int)
-            prefix_mode: Se True, cerca tutte le parole che iniziano con questo numero
-                        (es. "94" troverà anche "940", "941", "942", ecc.)
+
+        mode:
+            "esatta"    -> corrispondenza esatta
+            "prefisso"   -> la sequenza numerica inizia con numero
+            "suffisso"   -> la sequenza numerica termina con numero
+            "contiene" -> la sequenza numerica contiene numero
         """
         numero_str = str(numero)
-        
-        if not prefix_mode:
-            # Modalità normale: match esatto
+
+        if mode == "esatta":
             parole = self.parole_per_numero.get(numero_str, [])
         else:
-            # Modalità prefix: tutte le chiavi che iniziano con numero_str
             parole = []
+
             for chiave, lista_parole in self.parole_per_numero.items():
-                if chiave.startswith(numero_str):
+                if mode == "prefisso" and chiave.startswith(numero_str):
                     parole.extend(lista_parole)
-        
+
+                elif mode == "suffisso" and chiave.endswith(numero_str):
+                    parole.extend(lista_parole)
+
+                elif mode == "contiene" and numero_str in chiave:
+                    parole.extend(lista_parole)
+
         return sorted(parole)
-    
-    def mostra_risultati(self, numero, max_risultati=1000, prefix_mode=False):
+
+    def mostra_risultati(self, numero, max_risultati=1000, mode="esatta"):
         """Mostra i risultati della ricerca."""
-        parole = self.cerca_parole(numero, prefix_mode=prefix_mode)
-        
-        modo = "che iniziano con" if prefix_mode else "esatte per"
-        
+
+        parole = self.cerca_parole(numero, mode=mode)
+
+        descrizioni = {
+            "esatta": "esatte per",
+            "prefisso": "che iniziano con",
+            "suffisso": "che terminano con",
+            "contiene": "che contengono"
+        }
+
+        modo = descrizioni.get(mode, "corrispondenti a")
+
+        if mode == "prefisso":
+            comando_visualizzato = f"{numero}+"
+        elif mode == "suffisso":
+            comando_visualizzato = f"+{numero}"
+        elif mode == "contiene":
+            comando_visualizzato = f"+{numero}+"
+        else:
+            comando_visualizzato = str(numero)
+
         print(f"\n{'='*60}")
-        print(f"Numero: {numero}{'+' if prefix_mode else ''}")
-        print(f"Parole {modo}: {len(parole)}")
+        print(f"Numero: {comando_visualizzato}")
+        print(f"Parole {modo} {numero}: {len(parole)}")
         print(f"{'='*60}")
-        
+
         if parole:
             for i, parola in enumerate(parole[:max_risultati], 1):
-                # Mostra anche il numero completo in modalità prefix
-                if prefix_mode:
+                if mode != "esatta":
                     num = self.parola_a_numero(parola)
                     print(f"{i:3d}. {parola:20s} ({num})")
                 else:
                     print(f"{i:3d}. {parola}")
-            
+
             if len(parole) > max_risultati:
                 print(f"\n... e altre {len(parole) - max_risultati} parole.")
         else:
             print("Nessuna parola trovata per questo numero.")
-    
+
     def modalita_interattiva(self):
         """Modalità interattiva per cercare parole."""
         print("\n" + "="*60)
@@ -269,14 +292,16 @@ class MajorSystemIT:
         print("="*60)
         print("\nComandi disponibili:")
         print("  - Inserisci un numero per trovare le parole corrispondenti")
-        print("  - Inserisci un numero seguito da '+' per trovare tutte le parole che iniziano con quel numero")
+        print("  - Inserisci un numero seguito da '+' per trovare le parole che iniziano con quel numero")
+        print("  - Inserisci '+' seguito da un numero per trovare le parole che terminano con quel numero")
+        print("  - Inserisci '+' all'inizio e alla fine di un numero per trovare le parole che contengono quel numero")
         print("  - Inserisci una parola per vedere il numero corrispondente")
         print("  - Premi 'ctrl + c' oppure '!' per uscire")
         print()
-        
+
         while True:
             try:
-                
+
                 comando = input("\n> ").strip()
                 if comando == "!":
                     print("\nInterrotto. Arrivederci!")
@@ -290,18 +315,36 @@ class MajorSystemIT:
                     else:
                         print(f"'{parola}', come da regole, non produce alcun numero.")
                     continue
-                
-                # Controlla se c'è il simbolo +
-                prefix_mode = False
-                if comando.endswith('+') or comando.endswith(' +'):
-                    prefix_mode = True
-                    comando = comando.rstrip(' +')
-                
+
+                # Determina la modalità di ricerca
+                mode = "esatta"
+
+                if comando.startswith('+') and comando.endswith('+'):
+                    # +23+
+                    mode = "contiene"
+                    comando = comando[1:-1].strip()
+
+                elif comando.startswith('+'):
+                    # +23
+                    mode = "suffisso"
+                    comando = comando[1:].strip()
+
+                elif comando.endswith('+'):
+                    # 23+
+                    mode = "prefisso"
+                    comando = comando[:-1].strip()
+
                 if comando.isdigit():
-                    self.mostra_risultati(comando, prefix_mode=prefix_mode)
+                    self.mostra_risultati(comando, mode=mode)
                 else:
-                    print("Inserisci un numero valido (opzionalmente seguito da '+') o una parola.")
-                    
+                    print(
+                        "Inserisci un comando valido:\n"
+                        "  23    = esatto\n"
+                        "  23+   = inizia con\n"
+                        "  +23   = termina con\n"
+                        "  +23+  = contiene"
+                    )
+
             except KeyboardInterrupt:
                 print("\nInterrotto. Arrivederci!")
                 break
@@ -313,15 +356,8 @@ class MajorSystemIT:
 if __name__ == "__main__":
     # Crea l'istanza del sistema
     ms = MajorSystemIT('dizionario.txt')
-    
+
     # Carica il dizionario
     ms.carica_dizionario()
-    
-    # Esempi di test
-    print("\nEsempi di conversione:")
-    test_parole = ['casa', 'zerbino', 'scienza', 'gatto', 'gnomo', 'figlio', 'ciao', 'chiave', 'matta', 'palla', 'carro', 'glifo', 'glicerina', 'aglio', 'cuore', 'quadro', 'soqquadro', 'acqua']
-    for parola in test_parole:
-        print(f"{parola:12s} -> {ms.parola_a_numero(parola)}")
-    
     # Avvia modalità interattiva
     ms.modalita_interattiva()
