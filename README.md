@@ -49,7 +49,7 @@ Ogni cifra decimale da 0 a 9 corrisponde a uno o più suoni consonantici specifi
 ```bash
 # Clona la repository (o scaricala da web)
 git clone https://github.com/MrsSAS/Conversione-Fonetica
-cd conversione_fonetica
+cd Conversione-Fonetica
 
 ```
 
