@@ -26,14 +26,21 @@ class MajorSystemIT:
         self.parole_per_numero = defaultdict(list)
 
     def _dizionario_modificato(self):
-        """Verifica se il dizionario è stato modificato dopo la cache."""
+        """Verifica se il dizionario o lo script sono stati modificati dopo la cache."""
         if not os.path.exists(self.cache_path):
             return True
 
+        script_path = __file__
         dict_mtime = os.path.getmtime(self.dizionario_path)
         cache_mtime = os.path.getmtime(self.cache_path)
 
-        return dict_mtime > cache_mtime
+        if dict_mtime > cache_mtime:
+            return True
+
+        if os.path.exists(script_path) and os.path.getmtime(script_path) > cache_mtime:
+            return True
+
+        return False
 
 
     def parola_a_numero(self, parola):
@@ -43,49 +50,26 @@ class MajorSystemIT:
         i = 0
         ultimo_numero = None  # Per gestire le doppie
 
+        VOCALI = set('aeiouyàâèéìòôù')
+        VOCALI_PALATALI = set('eièéìíî')
+
         while i < len(parola):
-            # Gestione sequenze di 3+ caratteri per "gli"
-            if i + 2 < len(parola):
-                # Controlla se abbiamo "gli" seguito da vocale o fine parola
-                if parola[i:i+2] == 'gl':
-                    if i + 2 < len(parola) and parola[i+2] in 'aeiouy':
-                        # "gli" + vocale = suono unico (5)
-                        if ultimo_numero != '5':
-                            numero += '5'
-                            ultimo_numero = '5'
-                        i += 3  # Salta g, l, vocale
-                        continue
-                    elif i + 2 == len(parola) - 1 and parola[i+2] == 'i':
-                        # "gli" a fine parola = suono unico (5)
-                        if ultimo_numero != '5':
-                            numero += '5'
-                            ultimo_numero = '5'
-                        i += 3
-                        continue
-                    # Altrimenti "gl" + consonante = due suoni separati (continua normalmente)
+            char = parola[i]
 
-                # sci/sce = 0
-                tri = parola[i:i+3]
-                if tri in ['sci', 'sce']:
-                    if ultimo_numero != '0':
-                        numero += '0'
-                        ultimo_numero = '0'
-                    i += 3
-                    continue
-
-            # Controlla "gli" a fine parola (2 caratteri rimanenti)
-            if i + 2 == len(parola) and parola[i:i+3] == 'gli':
-                if ultimo_numero != '5':
-                    numero += '5'
-                    ultimo_numero = '5'
+            # 1. Trigrammi specifici
+            # cch / ggh: occlusiva velare geminata (suono duro = 7)
+            if i + 2 < len(parola) and parola[i:i+3] in ['cch', 'ggh']:
+                if ultimo_numero != '7':
+                    numero += '7'
+                    ultimo_numero = '7'
                 i += 3
                 continue
 
-            # Gestione sequenze di 2 caratteri
+            # 2. Bigrammi specifici
             if i + 1 < len(parola):
                 bi = parola[i:i+2]
 
-                # gn = 2
+                # gn = 2 (suono unico)
                 if bi == 'gn':
                     if ultimo_numero != '2':
                         numero += '2'
@@ -93,7 +77,7 @@ class MajorSystemIT:
                     i += 2
                     continue
 
-                # ch = 7 (suono duro)
+                # ch / gh = 7 (suono duro)
                 if bi in ['ch', 'gh']:
                     if ultimo_numero != '7':
                         numero += '7'
@@ -101,17 +85,67 @@ class MajorSystemIT:
                     i += 2
                     continue
 
-                # ci/ce/gi/ge = 6 (suono dolce)
-                if bi in ['ci', 'ce', 'gi', 'ge']:
-                    if ultimo_numero != '6':
-                        numero += '6'
-                        ultimo_numero = '6'
+                # cq = 7 (rafforzamento di q, suono duro)
+                if bi == 'cq':
+                    if ultimo_numero != '7':
+                        numero += '7'
+                        ultimo_numero = '7'
                     i += 2
                     continue
 
-            # Gestione caratteri singoli
-            char = parola[i]
+                # cc:
+                # - se seguito da vocale palatale (e, i...) -> suono dolce geminato (6)
+                # - altrimenti -> suono duro geminato (7)
+                if bi == 'cc':
+                    if i + 2 < len(parola) and parola[i+2] in VOCALI_PALATALI:
+                        if ultimo_numero != '6':
+                            numero += '6'
+                            ultimo_numero = '6'
+                    else:
+                        if ultimo_numero != '7':
+                            numero += '7'
+                            ultimo_numero = '7'
+                    i += 2
+                    continue
 
+                # gg:
+                # - se seguito da vocale palatale (e, i...) -> suono dolce geminato (6)
+                # - altrimenti -> suono duro geminato (7)
+                if bi == 'gg':
+                    if i + 2 < len(parola) and parola[i+2] in VOCALI_PALATALI:
+                        if ultimo_numero != '6':
+                            numero += '6'
+                            ultimo_numero = '6'
+                    else:
+                        if ultimo_numero != '7':
+                            numero += '7'
+                            ultimo_numero = '7'
+                    i += 2
+                    continue
+
+                # gli:
+                # - se 'gl' è seguito da 'i' E (fine parola O altra vocale) -> laterale palatale (5)
+                #   (consumiamo 'gl', lasciando 'i' e le vocali successive per azzerare ultimo_numero)
+                # - altrimenti (es. 'gl' + altra vocale come 'globo', o 'gli' + consonante come 'glifo')
+                #   sono suoni separati g (7) e l (5)
+                if bi == 'gl' and i + 2 < len(parola) and parola[i+2] == 'i':
+                    if i + 3 == len(parola) or parola[i+3] in VOCALI:
+                        if ultimo_numero != '5':
+                            numero += '5'
+                            ultimo_numero = '5'
+                        i += 2
+                        continue
+
+                # sc prima di vocale palatale (e, i...) = 0 (suono unico /ʃ/)
+                # (consumiamo 'sc', lasciando la vocale successiva per azzerare ultimo_numero)
+                if bi == 'sc' and i + 2 < len(parola) and parola[i+2] in VOCALI_PALATALI:
+                    if ultimo_numero != '0':
+                        numero += '0'
+                        ultimo_numero = '0'
+                    i += 2
+                    continue
+
+            # 3. Caratteri singoli
             if char in ['s', 'z']:
                 if ultimo_numero != '0':
                     numero += '0'
@@ -136,23 +170,14 @@ class MajorSystemIT:
                 if ultimo_numero != '5':
                     numero += '5'
                     ultimo_numero = '5'
-            # Controllo contesto per c/g
             elif char in ['c', 'g']:
-                if i + 1 < len(parola):
-                    next_char = parola[i + 1]
-                    if next_char in ['e', 'i']:
-                        # Già gestito sopra come sequenza
-                        if ultimo_numero != '6':
-                            numero += '6'
-                            ultimo_numero = '6'
-                        i += 1
-                    else:
-                        # Suono duro
-                        if ultimo_numero != '7':
-                            numero += '7'
-                            ultimo_numero = '7'
+                # c o g prima di vocale palatale (e, i...) -> dolce (6)
+                # altrimenti -> duro (7)
+                if i + 1 < len(parola) and parola[i+1] in VOCALI_PALATALI:
+                    if ultimo_numero != '6':
+                        numero += '6'
+                        ultimo_numero = '6'
                 else:
-                    # Fine parola, probabile suono duro
                     if ultimo_numero != '7':
                         numero += '7'
                         ultimo_numero = '7'
